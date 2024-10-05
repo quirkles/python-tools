@@ -1,0 +1,5 @@
+#!/Users/alex_quirk/Code/python-scripts/venv/bin/python
+
+from src.sport import main
+
+main.main()
