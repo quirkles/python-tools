@@ -1,4 +1,4 @@
-# Pyton cli tools
+# Python cli tools
 
 This is a repo designed to make it easy to build and develop python cli tools. It is a simple template that you can use to get started with your own cli tool.
 
@@ -6,7 +6,7 @@ This is a repo designed to make it easy to build and develop python cli tools. I
 
 ### Pyenv (recommended)
 
-Its recommended to use pyenv to manage your python versions. You can install pyenv by following the instructions [here](https://github.com/pyenv/pyenv)
+It is recommended to use pyenv to manage your python versions. You can install pyenv by following the instructions [here](https://github.com/pyenv/pyenv)
 
 ### Virtualenv
 
