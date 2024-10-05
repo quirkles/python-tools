@@ -23,6 +23,8 @@ bin_dir = os.path.abspath("bin")
 
 def main(args: Args) -> None:
     print("Creating new binary:", args.bin_name)
+    if args.bin_description:
+        print("Description:", args.bin_description)
     # check that there is no directory with the bin_slug name in bin/src
     does_bin_dir_exist = args.bin_slug in [
         directory for directory
@@ -68,7 +70,7 @@ def main(args: Args) -> None:
     # get the absolute path to the python executable running this script
     python_path = shutil.which("python")
 
-    with open("bin/{args.bin_slug}", "w") as f:
+    with open(f"bin/{args.bin_slug}", "w") as f:
         template = environment.get_template("binary.tmpl")
         f.write(
             template.render(
@@ -81,6 +83,8 @@ def main(args: Args) -> None:
 
     # make the binary executable by granting it the necessary permissions
     os.chmod(f"bin/{args.bin_slug}", 0o755)
+
+    print(f"Binary {args.bin_name} created successfully")
 
 
 def parse_args() -> Args:
@@ -96,8 +100,9 @@ def parse_args() -> Args:
 
     parser.add_argument(
         "-d",
-        "--description",
-        metavar="description",
+        "--bin_description",
+        metavar="binary description",
+        dest="bin_description",
         type=str,
         help="The description of the binary",
         required=False
