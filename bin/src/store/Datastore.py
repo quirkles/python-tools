@@ -23,9 +23,7 @@ class Datastore:
         with open(datastore_path, "w") as f:
             json.dump(self.data, f)
 
-    def process(
-            self,
-            key_name: str, action: action_choices, value_or_version: str):
+    def process(self, key_name: str, action: action_choices, value_or_version: str):
         match action:
             case "put":
                 self.put(key_name, value_or_version)
