@@ -11,7 +11,7 @@ class Args(BaseModel):
     bin_name: str
     bin_description: Optional[str] = Field(default=None)
     should_use_config: Optional[bool] = Field(default=False)
-    should_use_database: Optional[bool] = Field(default=False)
+    should_use_db: Optional[bool] = Field(default=False)
 
     @computed_field
     @property
@@ -56,7 +56,11 @@ def main(args: Args) -> None:
 
     filenames = ["main.py", "arg_parser.py",  "__main__.py", "__init__.py"]
     # Now we iterate over the filenames and render the templates
-    environment = Environment(loader=FileSystemLoader("templates/binary/"))
+    environment = Environment(
+        loader=FileSystemLoader("templates/binary/"),
+        trim_blocks=True,
+        lstrip_blocks=True
+    )
     for filename in filenames:
         template = environment.get_template(f"{filename}.tmpl")
         with open(f"bin/src/{args.bin_slug}/{filename}", "w") as f:
@@ -66,7 +70,7 @@ def main(args: Args) -> None:
                     binary_description=args.bin_description,
                     binary_slug=args.bin_slug,
                     should_use_config=args.should_use_config,
-                    should_use_database=args.should_use_database
+                    should_use_db=args.should_use_db
                 )
             )
     # now we write the binary to the bin directory

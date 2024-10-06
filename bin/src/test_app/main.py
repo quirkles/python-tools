@@ -1,18 +1,10 @@
-from src.{{binary_slug}}.arg_parser import arg_parser, Args
-{% if should_use_config %}
+from src.test_app.arg_parser import arg_parser, Args
 from src.shared.Config import Config
-{% endif %}
-{% if should_use_db %}
 from src.shared.Database import Database
-{% endif %}
 
-{% if should_use_config %}
-config = Config("{{binary_slug}}")
-{% endif %}
+config = Config("test_app")
 
-{% if should_use_db %}
-db = Database("{{binary_slug}}")
-{% endif %}
+db = Database("test_app")
 
 
 def main():
@@ -21,17 +13,15 @@ def main():
 
     # Print the version
     if args.verbose:
-        print(f'Executing {{binary_name or binary_slug}}')
+        print(f'Executing test_app')
 
     if not args.command:
         run(args, extra_args)
         exit(0)
     else:
         match args.command:
-            {% if should_use_config %}
             case "config":
                 handle_config(args, extra_args)
-            {% endif %}
             case _:
                 print("Unknown command")
                 exit(1)
@@ -39,13 +29,12 @@ def main():
 
 
 def run(
-    args: Args,
-    extra_args: list[str],
+        args: Args,
+        extra_args: list[str],
 ):
-    print("running {{binary_name or binary_slug}}")
+    print("running test_app")
 
 
-{% if should_use_config %}
 def handle_config(args: Args, extra_args: list[str]):
     if not args.sub_command:
         print("config command requires a sub-command, one of get, set, delete")
@@ -59,6 +48,6 @@ def handle_config(args: Args, extra_args: list[str]):
         case "delete":
             config.delete(key_path)
         case _:
-            print(f"Unknown config command: {args.sub_command}. Must be one of get, set, delete")
+            print(
+                f"Unknown config command: {args.sub_command}. Must be one of get, set, delete")
             exit(1)
-{% endif %}
