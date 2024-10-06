@@ -132,7 +132,7 @@ def parse_args() -> Args:
         "-db",
         "--database",
         metavar="use sqlite database",
-        dest="should_use_database",
+        dest="should_use_db",
         action=argparse.BooleanOptionalAction,
         type=bool,
         help="If set, create a sqlite database for the binary",

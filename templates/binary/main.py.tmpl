@@ -1,8 +1,18 @@
 from src.{{binary_slug}}.arg_parser import arg_parser, Args
 {% if should_use_config %}
 from src.shared.Config import Config
+{% endif %}
+{% if should_use_db %}
+from src.shared.Database import Database
+{% endif %}
 
+
+{% if should_use_config %}
 config = Config("{{binary_slug}}")
+{% endif %}
+
+{% if should_use_db %}
+db = Database("{{binary_slug}}")
 {% endif %}
 
 def main():

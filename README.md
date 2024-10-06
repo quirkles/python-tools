@@ -49,6 +49,8 @@ Running `python create_bin.py` will create a new binary for you. You can pass th
 
 - The name of the binary you want to create
 - -d or --description: A description of what the binary does (optional)
+- -c or --config: If set, the script will create a config file for the binary and initialize some commands to get and set config values(optional)
+- -db or --database: If set, the script will create a sqlite database for the binary and initialize some commands to interact with the database(optional)
 
 eg:
 

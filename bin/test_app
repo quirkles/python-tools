@@ -1,5 +1,0 @@
-#!/Users/alex_quirk/Code/python-scripts/venv/bin/python
-
-from src.test_app import main
-
-main.main()
