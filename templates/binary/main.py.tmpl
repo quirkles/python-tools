@@ -21,7 +21,7 @@ def main():
 
     # Print the version
     if args.verbose:
-        print(f'Executing {{binary_name or binary_slug}}')
+        print('Executing {{binary_name or binary_slug}}')
 
     if not args.command:
         run(args, extra_args)

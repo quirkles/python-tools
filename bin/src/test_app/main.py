@@ -13,7 +13,7 @@ def main():
 
     # Print the version
     if args.verbose:
-        print(f'Executing test_app')
+        print('Executing test_app')
 
     if not args.command:
         run(args, extra_args)

@@ -4,6 +4,7 @@ from typing import Literal, Optional, get_args, Tuple, List
 
 commands = Literal["config"]
 
+
 class Args(BaseModel):
     command: Optional[commands] = Field(default=None)
     sub_command: Optional[str] = Field(default=None)
