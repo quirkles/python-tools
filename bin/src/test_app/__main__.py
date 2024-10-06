@@ -1,4 +1,4 @@
-from src.my_binary.main import main
+from src.test_app.main import main
 
 if __name__ == '__main__':
     main()

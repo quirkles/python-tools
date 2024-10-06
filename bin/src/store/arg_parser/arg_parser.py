@@ -19,7 +19,7 @@ def arg_parser() -> Args:
         metavar="action",
         type=str,
         choices=["put", "get"],
-        help=f"The action to take. One of: {", ".join(get_args(action_choices))}",
+        help=f"Top level command. One of: {", ".join(get_args(action_choices))}",
     )
 
     parser.add_argument("key_name", metavar="keyname", type=str, help="The key name")

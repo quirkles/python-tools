@@ -10,6 +10,8 @@ from jinja2 import Environment, FileSystemLoader
 class Args(BaseModel):
     bin_name: str
     bin_description: Optional[str] = Field(default=None)
+    should_use_config: Optional[bool] = Field(default=False)
+    should_use_database: Optional[bool] = Field(default=False)
 
     @computed_field
     @property
@@ -52,7 +54,7 @@ def main(args: Args) -> None:
 
     os.mkdir(f"bin/src/{args.bin_slug}")
 
-    filenames = ["main.py", "__main__.py", "__init__.py"]
+    filenames = ["main.py", "arg_parser.py",  "__main__.py", "__init__.py"]
     # Now we iterate over the filenames and render the templates
     environment = Environment(loader=FileSystemLoader("templates/binary/"))
     for filename in filenames:
@@ -62,7 +64,9 @@ def main(args: Args) -> None:
                 template.render(
                     binary_name=args.bin_name,
                     binary_description=args.bin_description,
-                    binary_slug=args.bin_slug
+                    binary_slug=args.bin_slug,
+                    should_use_config=args.should_use_config,
+                    should_use_database=args.should_use_database
                 )
             )
     # now we write the binary to the bin directory
@@ -91,6 +95,8 @@ def parse_args() -> Args:
     parser = argparse.ArgumentParser(
         description="A simple CLI to store user data"
     )
+
+    # Binary name, required
     parser.add_argument(
         "bin_name",
         metavar="binary name",
@@ -98,6 +104,7 @@ def parse_args() -> Args:
         help="The name of the binary"
     )
 
+    # Binary description, optional
     parser.add_argument(
         "-d",
         "--bin_description",
@@ -105,6 +112,30 @@ def parse_args() -> Args:
         dest="bin_description",
         type=str,
         help="The description of the binary",
+        required=False
+    )
+
+    # Config, optional, if set use a config file
+    parser.add_argument(
+        "-c",
+        "--config",
+        metavar="use config file",
+        dest="should_use_config",
+        action=argparse.BooleanOptionalAction,
+        type=bool,
+        help="If set, create a config file for the binary",
+        required=False
+    )
+
+    # Database, optional, if set use a sqlite database
+    parser.add_argument(
+        "-db",
+        "--database",
+        metavar="use sqlite database",
+        dest="should_use_database",
+        action=argparse.BooleanOptionalAction,
+        type=bool,
+        help="If set, create a sqlite database for the binary",
         required=False
     )
 
