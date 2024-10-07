@@ -79,3 +79,10 @@ options:
   --verbose, -v  Verbose output
 
 ```
+
+## Example
+
+An example todos app has been created to demonstrate how to use this template. The app has the following features:
+- cli help with -h
+- persistent config file
+- persistent sqlite database
