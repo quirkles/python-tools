@@ -2,13 +2,13 @@ from argparse import ArgumentParser
 
 from typing import Tuple, List
 
-from src.{{ binary_slug }}.arg_parser.args_models import CommandArgs
+from src.todos.arg_parser.args_models import CommandArgs
 
-parser = ArgumentParser(prog='{{ binary_slug }}')
+parser = ArgumentParser(prog='todos')
 
 sub_parser = parser.add_subparsers(
     title="commands",
-    description="Valid commands for {{ binary_slug }}",
+    description="Valid commands for todos",
     dest="command"
 )
 
@@ -16,7 +16,7 @@ sub_parser = parser.add_subparsers(
 def arg_parser() -> Tuple[CommandArgs, List[str]]:
     init_config_parser()
 
-    init_{{ binary_slug }}_parser()
+    init_todos_parser()
 
     args, known_args = parser.parse_known_args()
 
@@ -27,7 +27,7 @@ def arg_parser() -> Tuple[CommandArgs, List[str]]:
 
     if command != "config":
         sub_command = command
-        command = "{{ binary_slug }}"
+        command = "todos"
 
     command_dict = {
         "args": {
@@ -42,12 +42,11 @@ def arg_parser() -> Tuple[CommandArgs, List[str]]:
     return CommandArgs(**command_dict), known_args
 
 
-{% if should_use_config %}
 def init_config_parser():
     # Create the parser for the config subcommand
     config_parser = sub_parser.add_parser(
         "config",
-        help="Commands for managing the configuration for {{ binary_slug }}"
+        help="Commands for managing the configuration for todos"
     )
 
     # Create the subparsers for the config subcommand
@@ -96,32 +95,30 @@ def init_config_parser():
         "list",
         help="List all configuration values"
     )
-{% endif %}
 
 
-def init_{{ binary_slug }}_parser():
+def init_todos_parser():
     # Add the parser for the say subcommand
-    {{ binary_slug }}_add_parser = sub_parser.add_parser(
+    todos_add_parser = sub_parser.add_parser(
         "say",
         help="Say a message"
     )
 
     # Add the message argument to the say subcommand
-    {{ binary_slug }}_add_parser.add_argument(
+    todos_add_parser.add_argument(
         "msg",
         type=str,
         help="The message to say"
     )
 
-    {% if should_use_db %}
     # Add the parser for the save subcommand
-    {{ binary_slug }}_save_parser = sub_parser.add_parser(
+    todos_save_parser = sub_parser.add_parser(
         "save",
         help="Persist an item to the sqlite db"
     )
 
     # Add the item argument to the save subcommand
-    {{ binary_slug }}_save_parser.add_argument(
+    todos_save_parser.add_argument(
         "item",
         type=str,
         help="save an item"
@@ -132,4 +129,3 @@ def init_{{ binary_slug }}_parser():
         "list",
         help="List the items"
     )
-    {% endif %}

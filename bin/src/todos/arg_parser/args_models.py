@@ -27,48 +27,43 @@ class ConfigCommandArgs(BaseModel):
     ] = Field(discriminator="command")
 
 
-class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayCommandArgs(BaseModel):
+class TodosSayCommandArgs(BaseModel):
     command: Literal["say"]
     msg: str
 
 
-class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}RootCommandArgs(BaseModel):
+class TodosRootCommandArgs(BaseModel):
     command: Literal[None]
 
 
-{% if should_use_db %}
-class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SaveCommandArgs(BaseModel):
+class TodosSaveCommandArgs(BaseModel):
     model_config = ConfigDict(extra="allow")
     command: Literal["save"]
     item: str
 
 
-class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}ListCommandArgs(BaseModel):
+class TodosListCommandArgs(BaseModel):
     model_config = ConfigDict(extra="allow")
     command: Literal["list"]
-{% endif %}
 
 
-class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs(BaseModel):
+class TodosCommandArgs(BaseModel):
     model_config = ConfigDict(extra="allow")
-    command: Literal["{{ binary_slug }}"]
+    command: Literal["todos"]
     args: Union[
-        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayCommandArgs,
-        {% if should_use_db %}
-        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SaveCommandArgs,
-        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}ListCommandArgs,
-        {% endif %}
-        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}RootCommandArgs
+        TodosSayCommandArgs,
+        TodosSaveCommandArgs,
+        TodosListCommandArgs,
+        TodosRootCommandArgs
     ] = Field(discriminator="command")
 
 
 class CommandArgs(BaseModel):
     args: Optional[Union[
         ConfigCommandArgs,
-        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs
+        TodosCommandArgs
     ]] = Field(
         discriminator="command",
         default=None
     )
     verbose: bool = Field(default=False)
-

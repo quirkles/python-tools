@@ -1,0 +1,19 @@
+# We want to ignore everything except for the shared code and the todos directory
+
+#Init the whitelist behaviour
+*
+!*/
+
+#Ensure this file is added
+!.gitignore
+
+#Whitelist the shared code and todos directory
+!src/shared/**
+**/__pycache__/**
+
+!src/todos/**
+
+# Whitelist the todos bin
+!todos
+
+

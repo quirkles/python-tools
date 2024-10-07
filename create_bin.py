@@ -55,7 +55,9 @@ def main(args: Args) -> None:
     os.mkdir(f"bin/src/{args.bin_slug}")
 
     # Create the main.py, __main__.py and __init__.py files
-    root_filenames = ["main.py",  "__main__.py", "__init__.py"]
+
+    root_filenames = ["main.py", "__main__.py", "__init__.py"]
+
     # Iterate over the filenames and render the templates
     environment = Environment(
         loader=FileSystemLoader("templates/binary/"),
