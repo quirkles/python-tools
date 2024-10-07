@@ -1,0 +1,93 @@
+from typing import Optional, List, cast
+
+from src.{{binary_slug}}.arg_parser.arg_parser import arg_parser
+from src.{{binary_slug}}.arg_parser.args_models import ConfigCommandArgs, {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs
+
+{% if should_use_config %}
+from src.shared.Config import Config
+{% endif %}
+{% if should_use_db %}
+from src.shared.Database import Database
+{% endif %}
+
+{% if should_use_config %}
+config = Config("{{binary_slug}}")
+{% endif %}
+
+{% if should_use_db %}
+db = Database("{{binary_slug}}")
+{% endif %}
+
+
+def main():
+    # Parse command line arguments
+    parsed, extra = arg_parser()
+
+    if not parsed.args:
+        # If the command is not set, run the default command
+        run_{{ binary_slug }}()
+        exit(0)
+
+    if parsed.args.command == "{{ binary_slug }}":
+        run_{{ binary_slug }}(
+            cast(
+                {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs,
+                parsed.args.args
+            ),
+            extra
+        )
+        exit(0)
+
+    {% if should_use_config %}
+    # If the command is config, handle it
+    if parsed.args.command == "config":
+        handle_config(cast(ConfigCommandArgs, parsed.args.args))
+        exit(0)
+    {% endif %}
+
+
+def run_{{ binary_slug }}(
+    args: Optional[{{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs] = None,
+    extra: Optional[List[str]] = None,
+):
+    match args.command:
+        case None:
+            print("handle the base case for {{ binary_slug }}")
+            exit(0)
+        case "say":
+            msg = args.msg
+            if not msg:
+                print("arg \"msg\" provided")
+                exit(1)
+        {%  if should_use_db %}
+        case "save":
+            db.insert("items", {
+                "item": args.item
+            })
+        case "list":
+            db.list_all("items")
+        {% endif %}
+        case _:
+            print("Unknown command")
+            exit(1)
+
+
+{% if should_use_config %}
+def handle_config(args: ConfigCommandArgs):
+    if not args.args.command:
+        print("config command requires a sub-command, one of get, set, delete")
+        exit(1)
+    match args.args.command:
+        case "get":
+            print(config.get(args.args.key_path))
+        case "set":
+            config.update(
+                args.args.key_path,
+                args.args.value
+            )
+        case "list":
+            print(config.model_dump())
+        case _:
+            print(f"Unknown config command: {args.args.command}. Must be one of get, set, delete")
+            exit(1)
+{% endif %}

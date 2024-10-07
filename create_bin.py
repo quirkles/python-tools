@@ -54,20 +54,35 @@ def main(args: Args) -> None:
 
     os.mkdir(f"bin/src/{args.bin_slug}")
 
-    filenames = ["main.py", "arg_parser.py",  "__main__.py", "__init__.py"]
-    # Now we iterate over the filenames and render the templates
+    # Create the main.py, __main__.py and __init__.py files
+    root_filenames = ["main.py",  "__main__.py", "__init__.py"]
+    # Iterate over the filenames and render the templates
     environment = Environment(
         loader=FileSystemLoader("templates/binary/"),
         trim_blocks=True,
         lstrip_blocks=True
     )
-    for filename in filenames:
-        template = environment.get_template(f"{filename}.tmpl")
-        with open(f"bin/src/{args.bin_slug}/{filename}", "w") as f:
+    for f in root_filenames:
+        template = environment.get_template(f"{f}.jinja")
+        with open(f"bin/src/{args.bin_slug}/{f}", "w") as f:
             f.write(
                 template.render(
                     binary_name=args.bin_name,
                     binary_description=args.bin_description,
+                    binary_slug=args.bin_slug,
+                    should_use_config=args.should_use_config,
+                    should_use_db=args.should_use_db
+                )
+            )
+
+    # Create the arg_parser module
+    os.mkdir(f"bin/src/{args.bin_slug}/arg_parser")
+    arg_parser_files = ["args_models.py", "arg_parser.py", "__init__.py"]
+    for f in arg_parser_files:
+        template = environment.get_template(f"{f}.jinja")
+        with open(f"bin/src/{args.bin_slug}/arg_parser/{f}", "w") as f:
+            f.write(
+                template.render(
                     binary_slug=args.bin_slug,
                     should_use_config=args.should_use_config,
                     should_use_db=args.should_use_db
@@ -79,7 +94,7 @@ def main(args: Args) -> None:
     python_path = shutil.which("python")
 
     with open(f"bin/{args.bin_slug}", "w") as f:
-        template = environment.get_template("binary.tmpl")
+        template = environment.get_template("binary.jinja")
         f.write(
             template.render(
                 binary_name=args.bin_name,

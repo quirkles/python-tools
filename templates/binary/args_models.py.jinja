@@ -1,0 +1,71 @@
+from typing import Literal, Union, Optional
+
+from pydantic import BaseModel, Field, ConfigDict
+
+
+class ConfigGetCommandArgs(BaseModel):
+    command: Literal["get"]
+    key_path: str
+
+
+class ConfigSetCommandArgs(BaseModel):
+    command: Literal["set"]
+    key_path: str
+    value: str
+
+
+class ConfigListCommandArgs(BaseModel):
+    command: Literal["list"]
+
+
+class ConfigCommandArgs(BaseModel):
+    command: Literal["config"]
+    args: Union[
+        ConfigGetCommandArgs,
+        ConfigSetCommandArgs,
+        ConfigListCommandArgs
+    ] = Field(discriminator="command")
+
+
+class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayCommandArgs(BaseModel):
+    command: Literal["say"]
+    msg: str
+
+class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}RootCommandArgs(BaseModel):
+    command: Literal[None]
+
+
+{% if should_use_db %}
+class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SaveCommandArgs(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    command: Literal["save"]
+    item: str
+
+class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}ListCommandArgs(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    command: Literal["list"]
+{% endif %}
+
+
+class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    command: Literal["{{ binary_slug }}"]
+    args: Union[
+        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayCommandArgs,
+        {% if should_use_db %}
+        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SaveCommandArgs,
+        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}ListCommandArgs,
+        {% endif %}
+        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}RootCommandArgs
+    ] = Field(discriminator="command")
+
+
+class CommandArgs(BaseModel):
+    args: Optional[Union[
+        ConfigCommandArgs,
+        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs
+    ]] = Field(
+        discriminator="command",
+        default=None
+    )
+    verbose: bool = Field(default=False)

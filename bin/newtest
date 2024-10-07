@@ -1,5 +1,5 @@
 #!/Users/alex_quirk/Code/python-scripts/venv/bin/python
 
-from src.todos import main
+from src.newtest import main
 
 main.main()

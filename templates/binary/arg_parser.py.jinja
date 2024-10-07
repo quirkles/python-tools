@@ -1,0 +1,119 @@
+from argparse import ArgumentParser
+
+from typing import Tuple, List
+
+from src.{{ binary_slug }}.arg_parser.args_models import CommandArgs
+
+parser = ArgumentParser(prog='{{ binary_slug }}')
+
+sub_parser = parser.add_subparsers(
+    title="commands",
+    description="Valid commands for {{ binary_slug }}",
+    dest="command"
+)
+
+
+def arg_parser() -> Tuple[CommandArgs, List[str]]:
+    init_config_parser()
+
+    init_{{ binary_slug }}_parser()
+
+    args, known_args = parser.parse_known_args()
+
+    arg_dict = vars(args)
+
+    command = arg_dict.get("command", None)
+    sub_command = arg_dict.get("sub_command", None)
+
+    if command != "config":
+        sub_command = command
+        command = "{{ binary_slug }}"
+
+    command_dict = {
+        "args": {
+            "command": command,
+            "args": {
+                "command": sub_command,
+                **{k: v for k, v in arg_dict.items() if k not in ["command", "sub_command"]}
+            }
+        }
+    }
+
+    return CommandArgs(**command_dict), known_args
+
+{% if should_use_config %}
+def init_config_parser():
+    config_parser = sub_parser.add_parser(
+        "config",
+        help="Commands for managing the configuration for {{ binary_slug }}"
+    )
+
+    config_sub_parsers = config_parser.add_subparsers(
+        dest="sub_command",
+        required=True,
+        title="config sub commands",
+        description="Valid sub commands for config"
+    )
+
+    config_set_parser = config_sub_parsers.add_parser(
+        "set",
+        help="Set a configuration value"
+    )
+
+    config_set_parser.add_argument(
+        "key_path",
+        type=str,
+        help="A dot separated path to the configuration value to be set",
+    )
+    config_set_parser.add_argument(
+        "value",
+        type=str,
+        help="The value to set the configuration value to"
+    )
+
+    config_get_parser = config_sub_parsers.add_parser(
+        "get",
+        help="Get a configuration value"
+    )
+    config_get_parser.add_argument(
+        "key_path",
+        type=str,
+        help="A dot separated path to the configuration value to be retrieved"
+    )
+
+    config_sub_parsers.add_parser(
+        "list",
+        help="List all configuration values"
+    )
+{% endif %}
+
+
+def init_{{ binary_slug }}_parser():
+    {{ binary_slug }}_add_parser = sub_parser.add_parser(
+        "say",
+        help="Say a message"
+    )
+
+    {{ binary_slug }}_add_parser.add_argument(
+        "msg",
+        type=str,
+        help="The message to say"
+    )
+
+    {% if should_use_db %}
+    {{ binary_slug }}_save_parser = sub_parser.add_parser(
+        "save",
+        help="Persist an item to the sqlite db"
+    )
+
+    {{ binary_slug }}_save_parser.add_argument(
+        "item",
+        type=str,
+        help="save an item"
+    )
+
+    {{ binary_slug }}_list_parser = sub_parser.add_parser(
+        "list",
+        help="List the items"
+    )
+    {% endif %}
