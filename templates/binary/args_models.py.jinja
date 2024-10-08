@@ -1,6 +1,7 @@
 from typing import Literal, Union, Optional
 
 from pydantic import BaseModel, Field, ConfigDict
+{% if should_use_config %}
 
 
 class ConfigGetCommandArgs(BaseModel):
@@ -20,20 +21,33 @@ class ConfigListCommandArgs(BaseModel):
 
 class ConfigCommandArgs(BaseModel):
     command: Literal["config"]
-    args: Union[
+    sub_command: Union[
         ConfigGetCommandArgs,
         ConfigSetCommandArgs,
         ConfigListCommandArgs
     ] = Field(discriminator="command")
+{% endif %}
+
+class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}RootCommandArgs(BaseModel):
+    command: Literal[None]
+
+class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayBearGenerateCommandArgs(BaseModel):
+    command: Literal["bear"]
+    msg: str
+
+
+class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayFightGenerateCommandArgs(BaseModel):
+    command: Literal["fight"]
+    msg: str
 
 
 class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayCommandArgs(BaseModel):
     command: Literal["say"]
-    msg: str
-
-
-class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}RootCommandArgs(BaseModel):
-    command: Literal[None]
+    msg: Optional[str] = Field(default=None)
+    sub_command: Optional[Union[
+        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayBearGenerateCommandArgs,
+        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayFightGenerateCommandArgs
+    ]] = Field(discriminator="command", default=None)
 
 
 {% if should_use_db %}
@@ -48,25 +62,24 @@ class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}ListCommand
     command: Literal["list"]
 {% endif %}
 
-
-class {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs(BaseModel):
-    model_config = ConfigDict(extra="allow")
-    command: Literal["{{ binary_slug }}"]
-    args: Union[
-        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayCommandArgs,
-        {% if should_use_db %}
-        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SaveCommandArgs,
-        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}ListCommandArgs,
-        {% endif %}
-        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}RootCommandArgs
-    ] = Field(discriminator="command")
-
+{{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs = Union[
+    {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayCommandArgs,
+    {% if should_use_db %}
+    {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SaveCommandArgs,
+    {{ binary_slug | replace("_", " ") | title | replace(" ","") }}ListCommandArgs
+    {% endif %}
+]
 
 class CommandArgs(BaseModel):
-    args: Optional[Union[
-        ConfigCommandArgs,
-        {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs
-    ]] = Field(
+    args: Optional[
+        Union[
+            {% if should_use_config %}
+            ConfigCommandArgs,
+            {% endif %}
+            {{ binary_slug | replace("_", " ") | title | replace(" ","") }}RootCommandArgs,
+            {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs
+        ]
+    ] = Field(
         discriminator="command",
         default=None
     )

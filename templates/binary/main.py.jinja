@@ -1,7 +1,14 @@
 from typing import Optional, List, cast
 
 from src.{{binary_slug}}.arg_parser.arg_parser import arg_parser
-from src.{{binary_slug}}.arg_parser.args_models import ConfigCommandArgs, {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs
+from src.{{binary_slug}}.arg_parser.args_models import (
+    {% if should_use_config %}
+        ConfigCommandArgs,
+        ConfigSetCommandArgs,
+    {% endif %}
+    {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs,
+    {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayCommandArgs,
+)
 
 {% if should_use_config %}
 from src.shared.Config import Config
@@ -28,44 +35,74 @@ def main():
         run_{{ binary_slug }}()
         exit(0)
 
-    if parsed.args.command == "{{ binary_slug }}":
-        run_{{ binary_slug }}(
-            cast(
-                {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs,
-                parsed.args.args
-            ),
-            extra
-        )
-        exit(0)
-
     {% if should_use_config %}
     # If the command is config, handle it
     if parsed.args.command == "config":
-        handle_config(cast(ConfigCommandArgs, parsed.args.args))
+        handle_config(cast(ConfigCommandArgs, parsed.args))
         exit(0)
     {% endif %}
+
+    run_{{ binary_slug }}(
+        cast(
+            {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs,
+            parsed.args
+        ),
+        extra
+    )
+    exit(0)
+
 
 
 def run_{{ binary_slug }}(
     args: Optional[{{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs] = None,
     extra: Optional[List[str]] = None,
 ):
+    if not args or not args.command:
+        print("handle the base case for my_colors")
+        exit(0)
+
+    args = cast({{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs, args)
+
     match args.command:
-        case None:
-            print("handle the base case for {{ binary_slug }}")
-            exit(0)
         case "say":
-            msg = args.msg
+            args = cast({{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayCommandArgs, args)
+            msg = args.msg or args.sub_command.msg
             if not msg:
                 print("arg \"msg\" provided")
                 exit(1)
+            if not args.sub_command:
+                print(f"""
+{"#" * (len(msg) + 4)}
+# {msg} #
+{"#" * (len(msg) + 4)}""")
+                exit(0)
+            match args.sub_command.command:
+                case None:
+                    print(f"{msg}")
+                case "bear":
+                    print(f"""
+               {"_" * (len(msg))}
+ʕっ•ᴥ•ʔっ ----({msg})
+               {"‾" * (len(msg))}
+""")
+                case "fight":
+                    print(f"""
+              {"_" * (len(msg))}
+(ง •̀_•́)ง ----({msg})
+              {"‾" * (len(msg))}
+""")
+                case _:
+                    print(f"Unknown say command: {args.sub_command.command}")
+                    exit(1)
+            exit(0)
         {%  if should_use_db %}
         case "save":
             db.insert("items", {
                 "item": args.item
             })
         case "list":
-            db.list_all("items")
+            for item in db.list_all("items"):
+                print(item)
         {% endif %}
         case _:
             print("Unknown command")
@@ -74,20 +111,22 @@ def run_{{ binary_slug }}(
 
 {% if should_use_config %}
 def handle_config(args: ConfigCommandArgs):
-    if not args.args.command:
+    if not args.sub_command.command:
         print("config command requires a sub-command, one of get, set, delete")
         exit(1)
-    match args.args.command:
+    match args.sub_command.command:
         case "get":
-            print(config.get(args.args.key_path))
+            print(config.get(args.sub_command.key_path))
         case "set":
+            args = cast(ConfigSetCommandArgs, args.sub_command)
             config.update(
-                args.args.key_path,
-                args.args.value
+                args.key_path,
+                args.value
             )
         case "list":
             print(config.model_dump())
         case _:
-            print(f"Unknown config command: {args.args.command}. Must be one of get, set, delete")
+            print(
+                f"Unknown config command: {args.sub_command.command}. Must be one of get, set, delete")
             exit(1)
 {% endif %}
