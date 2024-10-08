@@ -25,21 +25,26 @@ def arg_parser() -> Tuple[CommandArgs, List[str]]:
     command = arg_dict.get("command", None)
     sub_command = arg_dict.get("sub_command", None)
 
-    if command != "config":
-        sub_command = command
-        command = "todos"
-
-    command_dict = {
+    command_args = {
         "args": {
             "command": command,
-            "args": {
-                "command": sub_command,
-                **{k: v for k, v in arg_dict.items() if k not in ["command", "sub_command"]}
-            }
         }
     }
 
-    return CommandArgs(**command_dict), known_args
+    if sub_command:
+        command_args["args"]["sub_command"] = {
+            "command": sub_command
+        }
+
+    for key, value in arg_dict.items():
+        if key in ["command", "sub_command"]:
+            continue
+        if sub_command:
+            command_args["args"]["sub_command"][key] = value
+        else:
+            command_args["args"][key] = value
+
+    return CommandArgs(**command_args), known_args
 
 
 def init_config_parser():
@@ -99,15 +104,49 @@ def init_config_parser():
 
 def init_todos_parser():
     # Add the parser for the say subcommand
-    todos_add_parser = sub_parser.add_parser(
+    todos_say_parser = sub_parser.add_parser(
         "say",
         help="Say a message"
     )
 
+    todos_say_sub_parser = todos_say_parser.add_subparsers(
+        dest="sub_command",
+        required=False,
+        title="Sub-commands for say",
+        description="Valid sub-commands for say, supported sub-commands are bear and fight"
+    )
+
     # Add the message argument to the say subcommand
-    todos_add_parser.add_argument(
-        "msg",
+    todos_say_parser.add_argument(
+        "-m",
+        "--msg",
         type=str,
+        help="The message to say"
+    )
+
+    my_colors_say_bear_parser = todos_say_sub_parser.add_parser(
+        "bear",
+        help="Say a bear message"
+    )
+
+    todos_say_bear_parser.add_argument(
+        "-m",
+        "--msg",
+        type=str,
+        required=True,
+        help="The message to say"
+    )
+
+    todos_say_fight_parser = todos_say_sub_parser.add_parser(
+        "fight",
+        help="Say a fight message"
+    )
+
+    todos_say_fight_parser.add_argument(
+        "-m",
+        "--msg",
+        type=str,
+        required=True,
         help="The message to say"
     )
 
@@ -119,7 +158,9 @@ def init_todos_parser():
 
     # Add the item argument to the save subcommand
     todos_save_parser.add_argument(
-        "item",
+        "--item",
+        "-i",
+        required=True,
         type=str,
         help="save an item"
     )

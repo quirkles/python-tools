@@ -20,20 +20,32 @@ class ConfigListCommandArgs(BaseModel):
 
 class ConfigCommandArgs(BaseModel):
     command: Literal["config"]
-    args: Union[
+    sub_command: Union[
         ConfigGetCommandArgs,
         ConfigSetCommandArgs,
         ConfigListCommandArgs
     ] = Field(discriminator="command")
 
+class TodosRootCommandArgs(BaseModel):
+    command: Literal[None]
 
-class TodosSayCommandArgs(BaseModel):
-    command: Literal["say"]
+class TodosSayBearGenerateCommandArgs(BaseModel):
+    command: Literal["bear"]
     msg: str
 
 
-class TodosRootCommandArgs(BaseModel):
-    command: Literal[None]
+class TodosSayFightGenerateCommandArgs(BaseModel):
+    command: Literal["fight"]
+    msg: str
+
+
+class TodosSayCommandArgs(BaseModel):
+    command: Literal["say"]
+    msg: Optional[str] = Field(default=None)
+    sub_command: Optional[Union[
+        TodosSayBearGenerateCommandArgs,
+        TodosSayFightGenerateCommandArgs
+    ]] = Field(discriminator="command", default=None)
 
 
 class TodosSaveCommandArgs(BaseModel):
@@ -46,23 +58,20 @@ class TodosListCommandArgs(BaseModel):
     model_config = ConfigDict(extra="allow")
     command: Literal["list"]
 
-
-class TodosCommandArgs(BaseModel):
-    model_config = ConfigDict(extra="allow")
-    command: Literal["todos"]
-    args: Union[
-        TodosSayCommandArgs,
-        TodosSaveCommandArgs,
-        TodosListCommandArgs,
-        TodosRootCommandArgs
-    ] = Field(discriminator="command")
-
+TodosCommandArgs = Union[
+    TodosSayCommandArgs,
+    TodosSaveCommandArgs,
+    TodosListCommandArgs
+]
 
 class CommandArgs(BaseModel):
-    args: Optional[Union[
-        ConfigCommandArgs,
-        TodosCommandArgs
-    ]] = Field(
+    args: Optional[
+        Union[
+            ConfigCommandArgs,
+            TodosRootCommandArgs,
+            TodosCommandArgs
+        ]
+    ] = Field(
         discriminator="command",
         default=None
     )
