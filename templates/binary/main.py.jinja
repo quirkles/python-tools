@@ -2,10 +2,10 @@ from typing import Optional, List, cast
 
 from src.{{binary_slug}}.arg_parser.arg_parser import arg_parser
 from src.{{binary_slug}}.arg_parser.args_models import (
-    {% if should_use_config %}
-        ConfigCommandArgs,
-        ConfigSetCommandArgs,
-    {% endif %}
+{% if should_use_config %}
+    ConfigCommandArgs,
+    ConfigSetCommandArgs,
+{% endif %}
     {{ binary_slug | replace("_", " ") | title | replace(" ","") }}CommandArgs,
     {{ binary_slug | replace("_", " ") | title | replace(" ","") }}SayCommandArgs,
 )
@@ -50,7 +50,6 @@ def main():
         extra
     )
     exit(0)
-
 
 
 def run_{{ binary_slug }}(
